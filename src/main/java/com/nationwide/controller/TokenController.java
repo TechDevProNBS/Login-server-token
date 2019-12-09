@@ -25,9 +25,9 @@ public class TokenController {
 	@Autowired
 	private TokenService service;
 	
-	@PostMapping("/{usernameId}")
-	public ResponseTokenDto createAuthToken(@PathVariable String usernameId) {
-		return mapping.map(service.assignToken(usernameId), ResponseTokenDto.class);
+	@PostMapping("/{accountId}")
+	public ResponseTokenDto createAuthToken(@PathVariable String accountId) {
+		return mapping.map(service.assignToken(accountId), ResponseTokenDto.class);
 	}
 	
 	@GetMapping("/{bearerToken}")
@@ -36,9 +36,9 @@ public class TokenController {
 		return mapping.map(service.resetBearerToken(token), ResponseTokenDto.class);
 	}
 	
-	@DeleteMapping("/all/{usernameId}")
-	public String deleteAllAuthToken(@PathVariable String usernameId) {
-		service.removeAllAuthTokens(usernameId);
+	@DeleteMapping("/all/{accountId}")
+	public String deleteAllAuthToken(@PathVariable String accountId) {
+		service.removeAllAuthTokens(accountId);
 		return "All Authentication Tokens have been removed";
 	}
 	

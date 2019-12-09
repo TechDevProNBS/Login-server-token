@@ -7,6 +7,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.nationwide.exceptions.NotFoundException;
+import com.nationwide.exceptions.UnauthorisedException;
 import com.nationwide.persistence.domain.Token;
 import com.nationwide.persistence.repository.TokenRepository;
 
@@ -41,26 +43,27 @@ public class TokenService {
 	}
 	
 	public Token getByBearerToken(String bearerToken) {
-		Token token = tokenRepository.findByBearerToken(bearerToken).orElseThrow(() -> new RuntimeException("Bearer Token Not found"));	
+		Token token = tokenRepository.findByBearerToken(bearerToken).orElseThrow(() -> new NotFoundException("Bearer Token Not found or has expired"));	
 		return removeIfOutdated(token);
 	}
 	
 	private Token removeIfOutdated(Token token) {
 		if(token.getExpireDate().before(new Date())) {
 			tokenRepository.delete(token);
-			throw new RuntimeException("Bearer Token Expired. It has been deleted");
+			throw new UnauthorisedException("Bearer Token Expired. It has been deleted");
 		}
 		return token;
 	}
 	
 	public Token resetBearerToken(Token token) {
+		System.out.println(token.getBearerToken());
 		token.setBearerToken(createBearerToken());
+		System.out.println(token.getBearerToken());
 		token.setExpireDate(getDateNextTenMinutes());
 		tokenRepository.flush();
 		return token;
 	}
 	
-		
 	public void removeAllAuthTokens(String usernameId) {
 		List<Token> tokens = tokenRepository.findByUsernameId(usernameId);
 		tokens.stream().forEach(token -> tokenRepository.delete(token));
